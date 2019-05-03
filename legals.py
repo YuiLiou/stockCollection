@@ -9,17 +9,17 @@ from io import StringIO
 
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 cursor = conn.cursor()         
-n_days = 2
+n_days = 25
 date = datetime.datetime.now()
 
 def insertIntoDB(df):
     for index, row in df.iterrows(): 
         try:       
-            foreign = row['外資自營商買賣超股數']
+            foreign = float(row['外陸資買賣超股數(不含外資自營商)'].replace(',',''))
             dealer = float(row['自營商買賣超股數'].replace(',',''))
             investment = float(row['投信買賣超股數'].replace(',',''))
             total = float(row['三大法人買賣超股數'].replace(',',''))        
-            sql = "INSERT INTO legals (`code`,`date`,`foreign`,`dealer`,`investment`,`total`) VALUES (%s,%s,%s,%s,%s,%s)"
+            sql = "INSERT INTO legals (`code`,`date`,`foreigner`,`dealer`,`investment`,`total`) VALUES (%s,%s,%s,%s,%s,%s)"
             val = (row['證券代號'],datestr,foreign,dealer,investment,total)
             cursor.execute(sql, val)
             conn.commit()
