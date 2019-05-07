@@ -7,12 +7,7 @@ import time
 import datetime
 from io import StringIO
 
-conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
-cursor = conn.cursor()         
-n_days = 2
-date = datetime.datetime.now()
-
-def insertIntoDB(df):
+def insertIntoDB(df,cursor,datestr):
     for index, row in df.iterrows(): 
         try:       
             today = float(row['收盤價'].replace(',',''))
@@ -31,17 +26,18 @@ def insertIntoDB(df):
         except Exception as e:
             print (e)
 
-if __name__ == '__main__':           
-    
+def priceParser(cursor,n_days):           
+    req_url = 'http://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date='
+    date = datetime.datetime.now()
     for i in range(n_days):
         if date.weekday() in [0,1,2,3,4]:
             try:
                 datestr = date.strftime("%Y%m%d")
-                r = requests.post('http://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date=' + datestr + '&type=ALL')    
+                r = requests.post(req_url + datestr + '&type=ALL')    
                 df = pd.read_csv(StringIO("\n".join([i.translate({ord(c): None for c in ' '}) 
                                     for i in r.text.split('\n') 
                                      if len(i.split('",')) == 17 and i[0] != '='])), header=0)
-                insertIntoDB(df)                
+                insertIntoDB(df,cursor,datestr)                
             except Exception as e:
                 print (e) 
         date -= datetime.timedelta(days=1)

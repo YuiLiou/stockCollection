@@ -7,14 +7,9 @@ import time
 import datetime
 from io import StringIO
 
-conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
-cursor = conn.cursor()         
-n_days = 25
-date = datetime.datetime.now()
-
-def insertIntoDB(df):
+def insertIntoDB(df,cursor,datestr):
     for index, row in df.iterrows(): 
-        try:       
+        try:                   
             foreign = float(row['外陸資買賣超股數(不含外資自營商)'].replace(',',''))
             dealer = float(row['自營商買賣超股數'].replace(',',''))
             investment = float(row['投信買賣超股數'].replace(',',''))
@@ -26,15 +21,16 @@ def insertIntoDB(df):
         except Exception as e:
             print (e)
 
-if __name__ == '__main__':           
-    
+def legalsParser(cursor,n_days):    
+    date = datetime.datetime.now()
+    req_url = 'http://www.tse.com.tw/fund/T86?response=csv&date='
     for i in range(n_days):
         if date.weekday() in [0,1,2,3,4]:
             try:
-                datestr = date.strftime("%Y%m%d")
-                r = requests.get('http://www.tse.com.tw/fund/T86?response=csv&date='+datestr+'&selectType=ALLBUT0999')   
+                datestr = date.strftime("%Y%m%d")                
+                r = requests.get(req_url+datestr+'&selectType=ALLBUT0999')   
                 df = pd.read_csv(StringIO(r.text), header=1).dropna(how='all', axis=1).dropna(how='any')
-                insertIntoDB(df)                                
+                insertIntoDB(df,cursor,datestr)                                
             except Exception as e:
                 print (e) 
         date -= datetime.timedelta(days=1)

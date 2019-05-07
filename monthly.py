@@ -7,8 +7,8 @@ from io import StringIO
 import time
 import math
 
-year = 2018
-months = [1,2,3,4,5,6,7,8,9,10,11,12]
+year = 2019
+months = [3,4]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 def monthly_report(year, month):
@@ -47,9 +47,9 @@ def monthly_report(year, month):
     return df
 if __name__ == '__main__':    
     # 綜合損益總表
-    try:
-        cur = conn.cursor() 
-        for month in months:       
+    cur = conn.cursor() 
+    for month in months:       
+        try:
             df = monthly_report(year,month)
             for index, row in df.iterrows():
                 sql = "insert into monthly (`code`,`month`,`current`,`Yearly`,`YoY`,`Yearly_YoY`) values (%s,%s,%s,%s,%s,%s)"
@@ -65,5 +65,5 @@ if __name__ == '__main__':
                 val = (row['公司代號'],s_month,row['當月營收'],row['當月累計營收'],YoY,Yearly_YoY)    
                 cur.execute(sql, val)               
             conn.commit()       
-    except Exception as e:
-        print (e)
+        except Exception as e:
+            print (e)

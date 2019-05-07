@@ -4,22 +4,24 @@ import datetime
 import time 
 from bs4 import BeautifulSoup
 
-origin_url = 'https://fnc.ebc.net.tw/Search/Result?type=keyword&value='
-base_url = 'https://fnc.ebc.net.tw'
-conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
-cursor = conn.cursor()         
 
-if __name__ == '__main__':      
+
+def newsParser(cursor,MAX_COUNT):   
+    origin_url = 'https://fnc.ebc.net.tw/Search/Result?type=keyword&value='
+    base_url = 'https://fnc.ebc.net.tw'       
+    MAX_FAIL_COUNT = 3 #新增三次失敗就放棄  
     code_list = []     
     sql = "SELECT distinct(code) FROM own"
     cursor.execute(sql)
     for row in cursor:
         code_list.append(row[0])
     for code in code_list:
+        print (code)
         new_url = origin_url + code
         res = requests.get(new_url)
         soup = BeautifulSoup(res.text, 'html.parser')
-        counter = 0
+        count = 0
+        fail_count = 0
         for link in soup.find(class_="fncnews-list-box").find_all('a'):
             date = link.find(class_='small-gray-text').text.replace('(','').replace(')','')
             title = link.find('span').text
@@ -27,13 +29,17 @@ if __name__ == '__main__':
             try:
                 print (date,title,url)
                 sql = "INSERT INTO news (`code`,`date`,`title`,`url`,`logTime`) VALUES (%s,%s,%s,%s,%s)"
-                val = ('2330',date,title,url,datetime.datetime.now())
+                val = (code,date,title,url,datetime.datetime.now())
                 cursor.execute(sql, val)
                 conn.commit()
-                if counter == 10: 
+                if count == MAX_COUNT: 
                     break
                 else:
-                    counter = counter + 1
+                    count = count + 1
             except:
-                print ('insert failed')
+                if fail_count == MAX_FAIL_COUNT:
+                    break
+                else:
+                    fail_count = fail_count + 1                
+                    print ('insert failed')
         time.sleep(3) 
