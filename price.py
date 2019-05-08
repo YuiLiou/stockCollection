@@ -1,4 +1,3 @@
-import twstock
 import pymysql
 import requests
 import pandas as pd
@@ -7,7 +6,8 @@ import time
 import datetime
 from io import StringIO
 
-def insertIntoDB(df,cursor,datestr):
+def insertIntoDB(df,conn,datestr):
+    cursor = conn.cursor()  
     for index, row in df.iterrows(): 
         try:       
             today = float(row['收盤價'].replace(',',''))
@@ -26,7 +26,7 @@ def insertIntoDB(df,cursor,datestr):
         except Exception as e:
             print (e)
 
-def priceParser(cursor,n_days):           
+def priceParser(conn,n_days):           
     req_url = 'http://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date='
     date = datetime.datetime.now()
     for i in range(n_days):
@@ -37,7 +37,8 @@ def priceParser(cursor,n_days):
                 df = pd.read_csv(StringIO("\n".join([i.translate({ord(c): None for c in ' '}) 
                                     for i in r.text.split('\n') 
                                      if len(i.split('",')) == 17 and i[0] != '='])), header=0)
-                insertIntoDB(df,cursor,datestr)                
+                insertIntoDB(df,conn,datestr)
+                print (datestr,'股價更新')                
             except Exception as e:
                 print (e) 
         date -= datetime.timedelta(days=1)

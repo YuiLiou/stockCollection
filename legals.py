@@ -7,7 +7,8 @@ import time
 import datetime
 from io import StringIO
 
-def insertIntoDB(df,cursor,datestr):
+def insertIntoDB(df,conn,datestr):
+    cursor = conn.cursor()  
     for index, row in df.iterrows(): 
         try:                   
             foreign = float(row['外陸資買賣超股數(不含外資自營商)'].replace(',',''))
@@ -21,7 +22,7 @@ def insertIntoDB(df,cursor,datestr):
         except Exception as e:
             print (e)
 
-def legalsParser(cursor,n_days):    
+def legalsParser(conn,n_days):    
     date = datetime.datetime.now()
     req_url = 'http://www.tse.com.tw/fund/T86?response=csv&date='
     for i in range(n_days):
@@ -30,7 +31,8 @@ def legalsParser(cursor,n_days):
                 datestr = date.strftime("%Y%m%d")                
                 r = requests.get(req_url+datestr+'&selectType=ALLBUT0999')   
                 df = pd.read_csv(StringIO(r.text), header=1).dropna(how='all', axis=1).dropna(how='any')
-                insertIntoDB(df,cursor,datestr)                                
+                insertIntoDB(df,conn,datestr)       
+                print (datestr,'法人更新')                         
             except Exception as e:
                 print (e) 
         date -= datetime.timedelta(days=1)

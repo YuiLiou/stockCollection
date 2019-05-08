@@ -6,7 +6,8 @@ from bs4 import BeautifulSoup
 
 
 
-def newsParser(cursor,MAX_COUNT):   
+def newsParser(conn,MAX_COUNT):
+    cursor = conn.cursor()     
     origin_url = 'https://fnc.ebc.net.tw/Search/Result?type=keyword&value='
     base_url = 'https://fnc.ebc.net.tw'       
     MAX_FAIL_COUNT = 3 #新增三次失敗就放棄  
@@ -26,8 +27,7 @@ def newsParser(cursor,MAX_COUNT):
             date = link.find(class_='small-gray-text').text.replace('(','').replace(')','')
             title = link.find('span').text
             url = base_url + link['href']
-            try:
-                print (date,title,url)
+            try:                
                 sql = "INSERT INTO news (`code`,`date`,`title`,`url`,`logTime`) VALUES (%s,%s,%s,%s,%s)"
                 val = (code,date,title,url,datetime.datetime.now())
                 cursor.execute(sql, val)
@@ -36,6 +36,7 @@ def newsParser(cursor,MAX_COUNT):
                     break
                 else:
                     count = count + 1
+                print (date,title,url)
             except:
                 if fail_count == MAX_FAIL_COUNT:
                     break
