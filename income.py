@@ -45,9 +45,12 @@ if __name__ == '__main__':
         cur = conn.cursor()        
         df = financial_statement(year,season,'營益分析彙總表')        
         for index, row in df.iterrows():
-            sql = "insert into income (`code`,`season`,`grossRate`,`operatingRate`,`operatingIncome`,`beforeTaxRate`,`afterTaxRate`) values (%s,%s,%s,%s,%s,%s,%s)"
-            val = (row['公司代號'],db_season,row['毛利率(%)(營業毛利)/(營業收入)'],row['營業利益率(%)(營業利益)/(營業收入)'],row['營業收入(百萬元)'],row['稅前純益率(%)(稅前純益)/(營業收入)'],row['稅後純益率(%)(稅後純益)/(營業收入)'])
-            cur.execute(sql, val)
+            try:
+                sql = "insert into income (`code`,`season`,`grossRate`,`operatingRate`,`operatingIncome`,`beforeTaxRate`,`afterTaxRate`) values (%s,%s,%s,%s,%s,%s,%s)"
+                val = (row['公司代號'],db_season,row['毛利率(%)(營業毛利)/(營業收入)'],row['營業利益率(%)(營業利益)/(營業收入)'],row['營業收入(百萬元)'],row['稅前純益率(%)(稅前純益)/(營業收入)'],row['稅後純益率(%)(稅後純益)/(營業收入)'])
+                cur.execute(sql, val)
+            except Exception as e:
+                print (e)    
         conn.commit()
     except Exception as e:
         print (e)
