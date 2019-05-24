@@ -1,12 +1,11 @@
-import twstock
+import time
 import pymysql
 import requests
 import pandas as pd
 import numpy as np
 
-year = 2019
-season = 1
-db_season = str(year) + 'Q' + str(season)
+years = [2017,2016,2015]
+seasons = [1,2,3,4]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 def financial_statement(year, season, type='綜合損益彙總表'):
@@ -41,16 +40,20 @@ def financial_statement(year, season, type='綜合損益彙總表'):
 
 if __name__ == '__main__':    
     # 綜合損益總表
-    try:
-        cur = conn.cursor()        
-        df = financial_statement(year,season,'營益分析彙總表')        
-        for index, row in df.iterrows():
-            try:
-                sql = "insert into income (`code`,`season`,`grossRate`,`operatingRate`,`operatingIncome`,`beforeTaxRate`,`afterTaxRate`) values (%s,%s,%s,%s,%s,%s,%s)"
-                val = (row['公司代號'],db_season,row['毛利率(%)(營業毛利)/(營業收入)'],row['營業利益率(%)(營業利益)/(營業收入)'],row['營業收入(百萬元)'],row['稅前純益率(%)(稅前純益)/(營業收入)'],row['稅後純益率(%)(稅後純益)/(營業收入)'])
-                cur.execute(sql, val)
-            except Exception as e:
-                print (e)    
-        conn.commit()
-    except Exception as e:
-        print (e)
+    for year in years:
+        for season in seasons:
+            cur = conn.cursor()        
+            df = financial_statement(year,season,'營益分析彙總表')        
+            for index, row in df.iterrows():
+                try:
+                    sql = "insert into income " \
+"(`code`,`year`,`season`,`grossRate`,`operatingRate`,`operatingIncome`,`beforeTaxRate`,`afterTaxRate`)" \
+"values (%s,%s,%s,%s,%s,%s,%s,%s)"
+                    val = (row['公司代號'],year,'Q'+str(season),row['毛利率(%)(營業毛利)/(營業收入)'],row['營業利益率(%)(營業利益)/(營業收入)'],row['營業收入(百萬元)'],row['稅前純益率(%)(稅前純益)/(營業收入)'],row['稅後純益率(%)(稅後純益)/(營業收入)'])
+                    cur.execute(sql, val)
+                except Exception as e:
+                    print (e)    
+            conn.commit()
+            print (year, season)
+            time.sleep(10)    
+

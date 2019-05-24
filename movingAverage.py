@@ -2,15 +2,14 @@ import pymysql
 import requests
 import datetime
 import time 
-from bs4 import BeautifulSoup
-
-
-
+from twstock import Stock
+conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
+'''
 def newsParser(conn,MAX_COUNT):
     cursor = conn.cursor()     
     origin_url = 'https://fnc.ebc.net.tw/Search/Result?type=keyword&value='
     base_url = 'https://fnc.ebc.net.tw'       
-    MAX_FAIL_COUNT = 1 #新增1次失敗就放棄  
+    MAX_FAIL_COUNT = 3 #新增三次失敗就放棄  
     code_list = []     
     sql = "SELECT distinct(code) FROM own"
     cursor.execute(sql)
@@ -44,3 +43,20 @@ def newsParser(conn,MAX_COUNT):
                     fail_count = fail_count + 1                
                     print ('insert failed')
         time.sleep(3) 
+'''
+if __name__ == '__main__': 
+    cursor = conn.cursor()     
+    code_list = []     
+    sql = "SELECT distinct(code) FROM own"
+    cursor.execute(sql)
+    for row in cursor:
+        code = row[0]
+        stock = Stock(code)
+        week_ma = stock.moving_average(stock.price, 5)
+        month_ma = stock.moving_average(stock.price, 20)
+        season_ma = stock.moving_average(stock.price, 60)
+        print (code, week_ma[-1], month_ma[-1], season_ma[-1])
+        time.sleep(10) 
+
+
+

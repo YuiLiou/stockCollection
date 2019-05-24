@@ -1,8 +1,9 @@
-import twstock
 import pymysql
 import requests
 import pandas as pd
 import numpy as np
+import datetime
+from io import StringIO
 
 year = 2017
 season = 4
@@ -43,12 +44,19 @@ def financial_statement(year, season, type='綜合損益彙總表'):
 if __name__ == '__main__':    
     # 公司代碼對照
     try:
-        cur = conn.cursor()        
-        df = financial_statement(year,season,'營益分析彙總表')        
+        cur = conn.cursor()  
+        req_url = 'http://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date='
+        date = datetime.datetime.now()
+        datestr = date.strftime("%Y%m%d")
+        r = requests.post(req_url + datestr + '&type=ALL')    
+        df = pd.read_csv(StringIO("\n".join([i.translate({ord(c): None for c in ' '}) 
+                            for i in r.text.split('\n') 
+                            if len(i.split('",')) == 17 and i[0] != '='])), header=0)   
+        
         for index, row in df.iterrows():
             try:
                 sql = "insert into company_map (`company`,`code`) values (%s,%s)"
-                val = (row['公司名稱'],row['公司代號'])
+                val = (row['證券名稱'],row['證券代號'])
                 cur.execute(sql, val)
                 conn.commit()
             except:

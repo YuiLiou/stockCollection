@@ -49,24 +49,22 @@ if __name__ == '__main__':
     # 綜合損益總表
     cur = conn.cursor() 
     for month in months:       
-        try:
-            df = monthly_report(year,month)
-            for index, row in df.iterrows():
-                try:
-                    sql = "insert into monthly (`code`,`month`,`current`,`Yearly`,`YoY`,`Yearly_YoY`) values (%s,%s,%s,%s,%s,%s)"
-                    if isinstance(row['去年同月增減(%)'],str):
-                        YoY = row['去年同月增減(%)']
-                    else:
-                        YoY = 0
-                    if isinstance(row['前期比較增減(%)'],str):
-                        Yearly_YoY = row['前期比較增減(%)']
-                    else:
-                        Yearly_YoY = 0
-                    s_month = str(year) + str.zfill(str(month),2)
-                    val = (row['公司代號'],s_month,row['當月營收'],row['當月累計營收'],YoY,Yearly_YoY)    
-                    cur.execute(sql, val)               
-                except Exception as e:
-                    print (e)
-            conn.commit()       
-        except Exception as e:
-            print (e)
+        df = monthly_report(year,month)
+        for index, row in df.iterrows():
+            try:
+                sql = "insert into monthly (`code`,`month`,`current`,`Yearly`,`YoY`,`Yearly_YoY`) values (%s,%s,%s,%s,%s,%s)"
+                if isinstance(row['去年同月增減(%)'],str):
+                    YoY = row['去年同月增減(%)']
+                else:
+                    YoY = 0
+                if isinstance(row['前期比較增減(%)'],str):
+                    Yearly_YoY = row['前期比較增減(%)']
+                else:
+                    Yearly_YoY = 0
+                s_month = str(year) + str.zfill(str(month),2)
+                val = (row['公司代號'],s_month,row['當月營收'],row['當月累計營收'],YoY,Yearly_YoY)    
+                cur.execute(sql, val)               
+            except Exception as e:
+                print (e)
+        conn.commit()       
+
