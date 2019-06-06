@@ -24,8 +24,7 @@ def insertIntoDB(df,conn,datestr):
             sql = "INSERT INTO prices (`code`,`date`,`price`,`moving`,`change`,`volume`,`PE`) VALUES (%s,%s,%s,%s,%s,%s,%s)"
             val = (code,datestr,today,moving,change,volume,PE)
             cursor.execute(sql, val)
-            conn.commit()
-            
+            conn.commit()            
             #-------------------------- moving average ----------------------------------
             for ma in [5,20,60]:
                 sql = "select avg(p.price) \
@@ -39,8 +38,8 @@ def insertIntoDB(df,conn,datestr):
                        group by p.code".format(datestr,code,ma) 
                 cursor.execute(sql)
                 for row in cursor:                    
-                    sql2 = "update prices set ma{} = %s where date = %s and code = %s".format(ma)
-                    val2 = (row[0],datestr, code)
+                    sql2 = "insert into ma (`code`,`date`,`span`,`value`) values (%s,%s,%s,%s)" 
+                    val2 = (code, datestr, ma, row[0])
                     cursor.execute(sql2, val2)
                     conn.commit()             
         except Exception as e:
