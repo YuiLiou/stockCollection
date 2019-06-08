@@ -9,6 +9,40 @@ conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock'
 years = [2019]
 seasons = ["1"]
 
+def indivisualSeason(cursor, year, season):
+    sql = "select code, year, season, eps from eps where year={} and season={}".format(year,season)
+    emap = dict()
+    for row in cursor: 
+        code = row[0]
+        year = row[1] 
+        season = row[2]
+        eps = row[3]     
+        if code not in emap:
+            emap[code] = dict()
+        if year not in emap[code]:
+            emap[code][year] = dict()
+        if season not in emap[code][year]:
+            emap[code][year][season] = dict()
+        emap[code][year][season] = eps
+    for code in emap:
+        for year in emap[code]:
+            for season in emap[code][year]:
+                try:
+                    if season == 'Q1':
+                        _season = season
+                        _eps = emap[code][year][season]
+                    else:
+                        _season = 'Q' + str(int(season[1])-1)                
+                        _eps = emap[code][year][season] - emap[code][year][_season]
+                    sql = "INSERT INTO _eps (`code`,`year`,`season`,`eps`) VALUES (%s,%s,%s,%s)"
+                    val = (code,year,season,_eps)
+                    cursor.execute(sql, val)
+                    conn.commit() 
+                except Exception as e:
+                    print (e)
+                    continue                
+        print (code)    
+
 if __name__ == '__main__': 
     cur = conn.cursor()
     for year in years:    
@@ -40,5 +74,7 @@ if __name__ == '__main__':
                         print (e)   
                     conn.commit()  
             time.sleep(10)
+            '''計算每季的eps,原本Q4=Q1+Q2+Q3+Q4'''
+            indivisualSeason(cur,year,season)
 
 
