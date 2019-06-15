@@ -22,10 +22,20 @@ def insertIntoDB(df,conn,datestr):
         except Exception as e:
             print (e)
 
-def legalsParser(conn,n_days):    
-    date = datetime.datetime.now()
+def legalsParser(conn):    
     req_url = 'http://www.tse.com.tw/fund/T86?response=csv&date='
-    for i in range(n_days):
+
+    #//////////////////////////////// start date ////////////////////////////////
+    cursor = conn.cursor() 
+    sql = "select date from prices order by date desc limit 0,1 "
+    cursor.execute(sql)
+    start_date = ""
+    for row in cursor:
+        start_date = row[0]
+
+    #//////////////////////////////// 更新前幾天股價 ////////////////////////////////     
+    date = datetime.datetime.now()
+    while date.strftime("%Y%m%d") != start_date:
         if date.weekday() in [0,1,2,3,4]:
             try:
                 datestr = date.strftime("%Y%m%d")                
@@ -37,3 +47,5 @@ def legalsParser(conn,n_days):
                 print (e) 
         date -= datetime.timedelta(days=1)
         time.sleep(10)
+
+

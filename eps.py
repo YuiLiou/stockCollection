@@ -11,6 +11,7 @@ seasons = ["1"]
 
 def indivisualSeason(cursor, year, season):
     sql = "select code, year, season, eps from eps where year={} and season={}".format(year,season)
+    cursor.execute(sql)
     emap = dict()
     for row in cursor: 
         code = row[0]

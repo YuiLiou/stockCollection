@@ -45,10 +45,20 @@ def insertIntoDB(df,conn,datestr):
         except Exception as e:
             print (e)
 
-def priceParser(conn,n_days):           
-    req_url = 'http://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date='
-    date = datetime.datetime.now() 
-    for i in range(n_days):
+def priceParser(conn):           
+    req_url = 'http://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date='     
+    
+    #//////////////////////////////// start date ////////////////////////////////
+    cursor = conn.cursor() 
+    sql = "select date from prices order by date desc limit 0,1 "
+    cursor.execute(sql)
+    start_date = ""
+    for row in cursor:
+        start_date = row[0]
+
+    #//////////////////////////////// 更新前幾天股價 ////////////////////////////////     
+    date = datetime.datetime.now()
+    while date.strftime("%Y%m%d") != start_date:
         if date.weekday() in [0,1,2,3,4]:
             try:
                 datestr = date.strftime("%Y%m%d")
@@ -62,3 +72,5 @@ def priceParser(conn,n_days):
                 print (e) 
         date -= datetime.timedelta(days=1)
         time.sleep(10)
+
+
