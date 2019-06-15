@@ -7,8 +7,8 @@ from io import StringIO
 import time
 import math
 
-year = 2019
-months = [5]
+year = 2018
+months = [1,2,3,4,5,6,7,8,9,10,11,12]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 def monthly_report(year, month):
@@ -50,19 +50,15 @@ if __name__ == '__main__':
     cur = conn.cursor() 
     for month in months:       
         df = monthly_report(year,month)
-        for index, row in df.iterrows():
+        for index, row in df.iterrows():         
             try:
-                sql = "insert into monthly (`code`,`month`,`current`,`Yearly`,`YoY`,`Yearly_YoY`) values (%s,%s,%s,%s,%s,%s)"
-                if isinstance(row['去年同月增減(%)'],str):
-                    YoY = row['去年同月增減(%)']
-                else:
-                    YoY = 0
-                if isinstance(row['前期比較增減(%)'],str):
-                    Yearly_YoY = row['前期比較增減(%)']
-                else:
-                    Yearly_YoY = 0
+                sql = "insert into monthly (`code`,`month`,`current`,`Yearly`,`MoM`,`YoY`,`Yearly_YoY`) \
+                       values (%s,%s,%s,%s,%s,%s,%s)"
+                MoM = row['上月比較增減(%)']
+                YoY = row['去年同月增減(%)']
+                Yearly_YoY = row['前期比較增減(%)']
                 s_month = str(year) + str.zfill(str(month),2)
-                val = (row['公司代號'],s_month,row['當月營收'],row['當月累計營收'],YoY,Yearly_YoY)    
+                val = (row['公司代號'],s_month,row['當月營收'],row['當月累計營收'],MoM,YoY,Yearly_YoY)    
                 cur.execute(sql, val)               
             except Exception as e:
                 print (e)
