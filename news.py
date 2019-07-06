@@ -27,7 +27,7 @@ def newsParser(conn,MAX_COUNT):
             date = link.find(class_='small-gray-text').text.replace('(','').replace(')','')
             title = link.find('span').text
             url = base_url + link['href']
-            if title.fine('◆') == -1: # 不看法人買賣超新聞           
+            if title.find('◆') == -1: # 不看法人買賣超新聞           
                 try:                
                     sql = "INSERT INTO news (`code`,`date`,`title`,`url`,`logTime`) VALUES (%s,%s,%s,%s,%s)"
                     val = (code,date,title,url,datetime.datetime.now())

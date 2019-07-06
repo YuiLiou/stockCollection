@@ -27,7 +27,7 @@ def legalsParser(conn):
 
     #//////////////////////////////// start date ////////////////////////////////
     cursor = conn.cursor() 
-    sql = "select date from prices order by date desc limit 0,1 "
+    sql = "select date from legals order by date desc limit 0,1 "
     cursor.execute(sql)
     start_date = ""
     for row in cursor:

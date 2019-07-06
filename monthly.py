@@ -7,8 +7,8 @@ from io import StringIO
 import time
 import math
 
-year = 2018
-months = [1,2,3,4,5,6,7,8,9,10,11,12]
+year = 2019
+months = [6]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 def monthly_report(year, month):
@@ -17,9 +17,9 @@ def monthly_report(year, month):
     if year > 1990:
         year -= 1911
     
-    url = 'http://mops.twse.com.tw/nas/t21/sii/t21sc03_'+str(year)+'_'+str(month)+'_0.html'
+    url = 'https://mops.twse.com.tw/nas/t21/sii/t21sc03_'+str(year)+'_'+str(month)+'_0.html'
     if year <= 98:
-        url = 'http://mops.twse.com.tw/nas/t21/sii/t21sc03_'+str(year)+'_'+str(month)+'.html'
+        url = 'https://mops.twse.com.tw/nas/t21/sii/t21sc03_'+str(year)+'_'+str(month)+'.html'
     
     # 偽瀏覽器
     headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
@@ -27,6 +27,7 @@ def monthly_report(year, month):
     # 下載該年月的網站，並用pandas轉換成 dataframe
     r = requests.get(url, headers=headers)
     r.encoding = 'big5'
+
     dfs = pd.read_html(StringIO(r.text))
     df = pd.concat([df for df in dfs if df.shape[1] <= 11 and df.shape[1] > 5])
     

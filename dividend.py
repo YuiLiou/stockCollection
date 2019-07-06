@@ -31,7 +31,8 @@ if __name__ == '__main__':
                 continue
             try:                
                 sql = "INSERT INTO dividend (`code`,`year`,`cash`,`allotment`,`total`) VALUES (%s,%s,%s,%s,%s)"
-                val = (code,row[0],row[1],row[4],row[5])
+                year = str(int(row[0]) + 1911)
+                val = (code,year,row[1],row[4],row[5])
                 cursor.execute(sql, val)
                 conn.commit()
             except Exception as e:
