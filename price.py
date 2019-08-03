@@ -6,6 +6,7 @@ import time
 import datetime
 from io import StringIO
 
+########################## 更新股價 ##########################
 def insertIntoDB(df,conn,datestr):
     cursor = conn.cursor()  
     for index, row in df.iterrows(): 
@@ -24,8 +25,16 @@ def insertIntoDB(df,conn,datestr):
             sql = "INSERT INTO prices (`code`,`date`,`price`,`moving`,`change`,`volume`,`PE`) VALUES (%s,%s,%s,%s,%s,%s,%s)"
             val = (code,datestr,today,moving,change,volume,PE)
             cursor.execute(sql, val)
-            conn.commit()            
-            #-------------------------- moving average ----------------------------------
+            conn.commit()         
+        except Exception as e:
+            print (e)
+
+########################## 更新均價 ##########################
+def updateMovingAverage(df, conn, datestr):
+    cursor = conn.cursor()
+    for index, row in df.iterrows(): 
+        try:
+            code = row['證券代號']            
             for ma in [5,20,60]:
                 sql = "select avg(p.price) \
                        from (select code , price \
@@ -56,7 +65,7 @@ def priceParser(conn):
     for row in cursor:
         start_date = row[0]
 
-    #//////////////////////////////// 更新前幾天股價 ////////////////////////////////     
+    #//////////////////////////////// 更新股價 ////////////////////////////////     
     date = datetime.datetime.now()
     while date.strftime("%Y%m%d") != start_date:
         if date.weekday() in [0,1,2,3,4]:
@@ -68,6 +77,23 @@ def priceParser(conn):
                                      if len(i.split('",')) == 17 and i[0] != '='])), header=0)
                 insertIntoDB(df,conn,datestr)
                 print (datestr,'股價更新')                
+            except Exception as e:
+                print (e) 
+        date -= datetime.timedelta(days=1)
+        time.sleep(10)
+    
+    #//////////////////////////////// 更新均線 ////////////////////////////////     
+    date = datetime.datetime.now()
+    while date.strftime("%Y%m%d") != start_date:
+        if date.weekday() in [0,1,2,3,4]:
+            try:
+                datestr = date.strftime("%Y%m%d")
+                r = requests.post(req_url + datestr + '&type=ALL')    
+                df = pd.read_csv(StringIO("\n".join([i.translate({ord(c): None for c in ' '}) 
+                                    for i in r.text.split('\n') 
+                                     if len(i.split('",')) == 17 and i[0] != '='])), header=0)
+                updateMovingAverage(df,conn,datestr)
+                print (datestr,'均線更新')                
             except Exception as e:
                 print (e) 
         date -= datetime.timedelta(days=1)

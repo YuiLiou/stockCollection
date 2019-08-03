@@ -43,8 +43,11 @@ if __name__ == '__main__':
     for year in years:
         for season in seasons:
             cur = conn.cursor()        
-            df = financial_statement(year,season,'營益分析彙總表')        
-
+            df = financial_statement(year,season,'資產負債彙總表')        
+            for index, row in df.iterrows():
+                print (row[index])
+            time.sleep(10)    
+'''
             for index, row in df.iterrows():
                 try:                    
                     sql = "insert into income " \
@@ -57,4 +60,6 @@ if __name__ == '__main__':
             conn.commit()
             print (year, season)
             time.sleep(10)    
+'''
+
 
