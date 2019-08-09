@@ -3,63 +3,37 @@ import requests
 import pandas as pd
 import numpy as np
 import datetime
+import twstock
 from io import StringIO
 
-year = 2017
-season = 4
-db_season = str(year) + 'Q' + str(season)
-
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
-
-def financial_statement(year, season, type='綜合損益彙總表'):
-    if year >= 1000:
-        year -= 1911
-    if type == '綜合損益彙總表':
-        url = 'http://mops.twse.com.tw/mops/web/ajax_t163sb04'
-    elif type == '資產負債彙總表':
-        url = 'http://mops.twse.com.tw/mops/web/ajax_t163sb05'
-    elif type == '營益分析彙總表':
-        url = 'http://mops.twse.com.tw/mops/web/ajax_t163sb06'
-    else:
-        print('type does not match')
-    r = requests.post(url, {
-        'encodeURIComponent':1,
-        'step':1,
-        'firstin':1,
-        'off':1,
-        'TYPEK':'sii',
-        'year':str(year),
-        'season':str(season),
-    })    
-    r.encoding = 'utf8'
-    dfs = pd.read_html(r.text)   
-    for i, df in enumerate(dfs):
-        df.columns = df.iloc[0]
-        dfs[i] = df.iloc[1:]        
-    df = pd.concat(dfs).applymap(lambda x: x if x != '--' else np.nan)
-    df = df[df['公司代號'] != '公司代號']
-    df = df[~df['公司代號'].isnull()]
-    return df
-
+req_url = 'http://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date='     
+    
 if __name__ == '__main__':    
-    # 公司代碼對照
     try:
-        cur = conn.cursor()  
-        req_url = 'http://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date='
-        date = datetime.datetime.now()
-        datestr = date.strftime("%Y%m%d")
+        cursor = conn.cursor()
+        datestr = "20190808"
         r = requests.post(req_url + datestr + '&type=ALL')    
         df = pd.read_csv(StringIO("\n".join([i.translate({ord(c): None for c in ' '}) 
-                            for i in r.text.split('\n') 
-                            if len(i.split('",')) == 17 and i[0] != '='])), header=0)   
-        
-        for index, row in df.iterrows():
+                         for i in r.text.split('\n') 
+                         if len(i.split('",')) == 17 and i[0] != '='])), header=0)
+        twDict = twstock.codes
+        for index, row in df.iterrows(): 
             try:
-                sql = "insert into company_map (`company`,`code`) values (%s,%s)"
-                val = (row['證券名稱'],row['證券代號'])
-                cur.execute(sql, val)
-                conn.commit()
-            except:
-                print ('insert error')
+                code = row['證券代號']
+                sql = "insert into company_map (`code`,`type`,`company`,`start`,`market`,`group`) \
+                       values (%s,%s,%s,%s,%s,%s)"
+                twTuple = twDict[code]
+                # tuple index: type, code, name, isin, start, market, group
+                val = (code, twTuple[0],twTuple[2],twTuple[4],twTuple[5],twTuple[6])
+                cursor.execute(sql, val)
+                conn.commit()     
+            except Exception as e:
+                print (e)   
     except Exception as e:
         print (e)
+
+
+
+
+
