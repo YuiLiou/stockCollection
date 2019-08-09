@@ -21,7 +21,7 @@ if __name__ == '__main__':
         for index, row in df.iterrows(): 
             try:
                 code = row['證券代號']
-                sql = "insert into company_map (`code`,`type`,`company`,`start`,`market`,`group`) \
+                sql = "insert into company_map (`code`,`type`,`company`,`start`,`market`,`grp`) \
                        values (%s,%s,%s,%s,%s,%s)"
                 twTuple = twDict[code]
                 # tuple index: type, code, name, isin, start, market, group
