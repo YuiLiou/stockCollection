@@ -8,7 +8,7 @@ import time
 import math
 
 year = 2019
-months = [6]
+months = [7]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 def monthly_report(year, month):

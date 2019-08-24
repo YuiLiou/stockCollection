@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 years = [2019]
-seasons = [2]
+seasons = [1]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 def financial_statement(year, season, type='綜合損益彙總表'):
@@ -43,8 +43,11 @@ if __name__ == '__main__':
     for year in years:
         for season in seasons:
             cur = conn.cursor()        
-            df = financial_statement(year,season,'營益分析彙總表')        
-
+            df = financial_statement(year,season,'綜合損益彙總表')        
+            for index, row in df.iterrows():
+                print (row[index])
+            time.sleep(10)    
+'''
             for index, row in df.iterrows():
                 try:                    
                     sql = "insert into income " \
@@ -57,4 +60,6 @@ if __name__ == '__main__':
             conn.commit()
             print (year, season)
             time.sleep(10)    
+'''
+
 
