@@ -3,9 +3,10 @@ import pymysql
 import requests
 import pandas as pd
 import numpy as np
+import math
 
 years = [2019]
-seasons = [1]
+seasons = [2]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 def financial_statement(year, season, type='綜合損益彙總表'):
@@ -44,22 +45,19 @@ if __name__ == '__main__':
         for season in seasons:
             cur = conn.cursor()        
             df = financial_statement(year,season,'綜合損益彙總表')        
+            col_names = list(df.columns.values)
             for index, row in df.iterrows():
-                print (row[index])
-            time.sleep(10)    
-'''
-            for index, row in df.iterrows():
-                try:                    
-                    sql = "insert into income " \
-"(`code`,`year`,`season`,`grossRate`,`operatingRate`,`operatingIncome`,`beforeTaxRate`,`afterTaxRate`)" \
-"values (%s,%s,%s,%s,%s,%s,%s,%s)"
-                    val = (row['公司代號'],year,'Q'+str(season),row['毛利率(%)(營業毛利)/(營業收入)'],row['營業利益率(%)(營業利益)/(營業收入)'],row['營業收入(百萬元)'],row['稅前純益率(%)(稅前純益)/(營業收入)'],row['稅後純益率(%)(稅後純益)/(營業收入)'])
-                    cur.execute(sql, val)                    
-                except Exception as e:
-                    print (e)    
+                for col in col_names:
+                    try:
+                        if math.isnan(float(row[col])):
+                            continue
+                        sql = "insert into income_2 (`year`,`season`,`code`,`col_name`,`value`) "\
+                              "values(%s,%s,%s,%s,%s) "
+                        val = (year, season, row['公司代號'], col, row[col])
+                        cur.execute(sql, val)
+                    except Exception as e:
+                        print (e)
             conn.commit()
-            print (year, season)
             time.sleep(10)    
-'''
 
 

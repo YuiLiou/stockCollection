@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 url = 'http://mops.twse.com.tw/mops/web/ajax_t163sb04?'\
       'encodeURIComponent=1&step=1&firstin=1&off=1&TYPEK=sii&year=102&season=01'
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
-years = [2019]
-seasons = ["2"]
+years = [2015]
+seasons = ["1","2","3","4"]
 
 def indivisualSeason(cursor, year, season):
     sql = "select code, year, season, eps from eps where year={}".format(year)
