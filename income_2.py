@@ -53,7 +53,7 @@ if __name__ == '__main__':
                             continue
                         sql = "insert into income_2 (`year`,`season`,`code`,`col_name`,`value`) "\
                               "values(%s,%s,%s,%s,%s) "
-                        val = (year, season, row['公司代號'], col, row[col])
+                        val = (year, 'Q'+str(season), row['公司代號'], col, row[col])
                         cur.execute(sql, val)
                     except Exception as e:
                         print (e)
