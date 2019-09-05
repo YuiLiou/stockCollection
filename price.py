@@ -21,7 +21,7 @@ def insertIntoDB(df,conn,datestr):
             yesterday = today - change
             moving = round((change/yesterday*100),2) 
             volume = float(row['成交股數'].replace(',',''))
-            PE = float(row['本益比'].replace(',',''))
+            PE = float(row['本益比'])
             sql = "INSERT INTO prices (`code`,`date`,`price`,`moving`,`change`,`volume`,`PE`) VALUES (%s,%s,%s,%s,%s,%s,%s)"
             val = (code,datestr,today,moving,change,volume,PE)
             cursor.execute(sql, val)
