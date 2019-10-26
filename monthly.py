@@ -8,7 +8,7 @@ import time
 import math
 
 year = 2019
-months = [8]
+months = [9]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 def monthly_report(year, month):
@@ -43,7 +43,7 @@ def monthly_report(year, month):
     df = df[df['公司代號'] != '合計']
     
     # 偽停頓
-    time.sleep(5)
+    time.sleep(10)
 
     return df
 if __name__ == '__main__':    
