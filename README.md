@@ -27,6 +27,7 @@
 
 ✔資產負債彙總表  → property.py
 
+✔現金流量彙總表  → cash_flow.py
 
 
 [每年更新]
