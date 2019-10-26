@@ -48,7 +48,7 @@ if __name__ == '__main__':
                         row[i] = ""
                 if index > 3 or index == 2:
                     sql = "insert into cash_detail " \
-                          "(`year`,`season`,`code`,`col_name`,`index`,`v1`,`v2`) " \
+                          "(`year`,`season`,`code`,`col_name`,`col_index`,`v1`,`v2`) " \
                           "values(%s,%s,%s,%s,%s,%s,%s) "
                     val = (year,seasonStr,code,row[0],index,row[1],row[2])
                     cur.execute(sql, val)
