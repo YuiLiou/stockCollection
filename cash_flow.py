@@ -35,6 +35,7 @@ if __name__ == '__main__':
     cur = conn.cursor() 
     company_list = list()
     seasonStr = 'Q'+str(season)
+    yearStr = str(year+1911)
     sql = "SELECT code FROM own group by code " 
     cur.execute(sql)
     for row in cur:
@@ -47,10 +48,10 @@ if __name__ == '__main__':
                     if not row[i]:
                         row[i] = ""
                 if index > 3 or index == 2:
-                    sql = "insert into cash_detail " \
+                    sql = "insert into cash_flow " \
                           "(`year`,`season`,`code`,`col_name`,`col_index`,`v1`,`v2`) " \
                           "values(%s,%s,%s,%s,%s,%s,%s) "
-                    val = (year,seasonStr,code,row[0],index,row[1],row[2])
+                    val = (yearStr,seasonStr,code,row[0],index,row[1],row[2])
                     cur.execute(sql, val)
             conn.commit()               
         except Exception as e:
