@@ -36,7 +36,16 @@ if __name__ == '__main__':
     company_list = list()
     seasonStr = 'Q'+str(season)
     yearStr = str(year+1911)
-    sql = "SELECT code FROM own group by code " 
+    sql = "SELECT code " \
+          "FROM own " \
+          "where not exists ( " \
+          "    select code " \
+          "    from cash_flow " \
+          "    where 1=1 " \
+          "    and year = '" + yearStr + "'" \
+          "    and season = '" + seasonStr + "'" \
+          ") " \
+          "group by code "
     cur.execute(sql)
     for row in cur:
         company_list.append(row[0])
