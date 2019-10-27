@@ -38,7 +38,7 @@ if __name__ == '__main__':
     yearStr = str(year+1911)
     sql = "SELECT code " \
           "FROM own " \
-          "where not exists ( " \
+          "where code not in ( " \
           "    select code " \
           "    from cash_flow " \
           "    where 1=1 " \
