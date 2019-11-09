@@ -81,6 +81,14 @@ def priceParser(conn):
                 print (e) 
         date -= datetime.timedelta(days=1)
         time.sleep(10)
+
+    #//////////////////////////////// start date ////////////////////////////////
+    cursor = conn.cursor() 
+    sql = "select date from ma order by date desc limit 0,1 "
+    cursor.execute(sql)
+    start_date = ""
+    for row in cursor:
+        start_date = row[0]
     
     #//////////////////////////////// 更新均線 ////////////////////////////////     
     date = datetime.datetime.now()
