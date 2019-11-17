@@ -5,8 +5,8 @@ import pandas as pd
 import numpy as np
 import math
 
-year = 108
-season = 2
+yearList = [103]
+seasonList = [4]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 def financial_statement(year, season, code):
@@ -30,48 +30,65 @@ def financial_statement(year, season, code):
     html_df = pd.read_html(r.text)[1].fillna("")
     return html_df
 
+def insertRows(stock_df, cur):
+    for index, row in stock_df.iterrows():         
+        for i in range(len(row)):
+            if not row[i]:
+                row[i] = ""
+        try:
+            # 標題
+            if index == 2:
+                sql = "insert into property_2 " \
+                      "(`year`,`season`,`code`,`col_name`,`col_index`,`v1`,`v2`,`v3`,`v4`,`v5`,`v6`) " \
+                      "values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
+                val = (yearStr,seasonStr,code,row[0],index,row[1],"%",row[2],"%",row[3],"%")
+                cur.execute(sql, val)
+            # 去年全年+同期
+            elif index > 3 and len(row) > 5:
+                sql = "insert into property_2 " \
+                      "(`year`,`season`,`code`,`col_name`,`col_index`,`v1`,`v2`,`v3`,`v4`,`v5`,`v6`) " \
+                      "values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
+                val = (yearStr,seasonStr,code,row[0],index,row[1],row[2],row[3],row[4],row[5],row[6])
+                cur.execute(sql, val)
+            # 去年同期
+            elif index > 3:    
+                sql = "insert into property_2 " \
+                      "(`year`,`season`,`code`,`col_name`,`col_index`,`v1`,`v2`,`v3`,`v4`) " \
+                      "values(%s,%s,%s,%s,%s,%s,%s,%s,%s) "
+                val = (yearStr,seasonStr,code,row[0],index,row[1],row[2],row[3],row[4])
+                cur.execute(sql, val)
+        except Exception as e:
+            print (e)    
+    conn.commit()             
+
 if __name__ == '__main__':    
     cur = conn.cursor()
-    seasonStr = 'Q'+str(season)
-    yearStr = str(year+1911)
-    sql = "SELECT code " \
-          "FROM own " \
-          "where code not in ( " \
-          "    select code " \
-          "    from property_2 " \
-          "    where 1=1 " \
-          "    and year = '" + yearStr + "'" \
-          "    and season = '" + seasonStr + "'" \
-          ") " \
-          "group by code "  
-    cur.execute(sql)
-    code_list = list()
-    for row in cur:
-        code_list.append(row[0])
-    for code in code_list:
-        try:
-            stock_df = financial_statement(year,season,code)        
-            for index, row in stock_df.iterrows():         
-                for i in range(len(row)):
-                    if not row[i]:
-                        row[i] = ""
-                if index == 2:
-                    sql = "insert into property_2 " \
-                          "(`year`,`season`,`code`,`col_name`,`col_index`,`v1`,`v2`,`v3`,`v4`,`v5`,`v6`) " \
-                          "values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
-                    val = (yearStr,seasonStr,code,row[0],index,row[1],"%",row[2],"%",row[3],"%")
-                    cur.execute(sql, val)
-                if index > 3:
-                    sql = "insert into property_2 " \
-                          "(`year`,`season`,`code`,`col_name`,`col_index`,`v1`,`v2`,`v3`,`v4`,`v5`,`v6`) " \
-                          "values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
-                    val = (yearStr,seasonStr,code,row[0],index,row[1],row[2],row[3],row[4],row[5],row[6])
-                    cur.execute(sql, val)
-                conn.commit()
-        except Exception as e:
-            print (e)
-        finally:
-            print (code , ' complete.')
-            time.sleep(10)     
+    for year in yearList :
+        for season in seasonList:            
+            seasonStr = 'Q'+str(season)
+            yearStr = str(year+1911)
+            sql = "SELECT code " \
+                  "FROM own " \
+                  "where code not in ( " \
+                  "    select code " \
+                  "    from property_2 " \
+                  "    where 1=1 " \
+                  "    and year = '" + yearStr + "'" \
+                  "    and season = '" + seasonStr + "'" \
+                  ") " \
+                  "group by code "
+            cur.execute(sql)
+            code_list = list()
+            for row in cur:
+                code_list.append(row[0])
+            for code in code_list:
+                try:
+                    stock_df = financial_statement(year,season,code)        
+                    insertRows(stock_df, cur)
+                    print (code, ' complete.')         
+                except Exception as e:
+                    print (code, 'Fail!:', e)
+                finally:
+                    time.sleep(10)     
 
 

@@ -6,7 +6,7 @@ import numpy as np
 import math
 
 years = [2019]
-seasons = [2]
+seasons = [3]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 def financial_statement(year, season, type='綜合損益彙總表'):
