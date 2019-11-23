@@ -10,6 +10,7 @@ years = [2019]
 seasons = ["3"]
 
 def indivisualSeason(cursor, year, season):
+    '''各季eps對照表'''
     sql = "select code, year, season, eps from eps where year={}".format(year)
     cursor.execute(sql)
     emap = dict()
@@ -25,9 +26,18 @@ def indivisualSeason(cursor, year, season):
         if season not in emap[code][year]:
             emap[code][year][season] = dict()
         emap[code][year][season] = eps
+    '''是否已經有資料'''
+    recordSeason = list()
+    sql = "select distinct season from _eps where year={}".format(year)
+    cursor.execute(sql)
+    for row in cursor:
+        recordSeason.append(row[0])
     for code in emap:
         for year in emap[code]:
             for season in emap[code][year]:
+                '''有資料的跳過'''
+                if season in recordSeason:
+                    continue
                 try:
                     if season == 'Q1':
                         _season = season
@@ -42,20 +52,18 @@ def indivisualSeason(cursor, year, season):
                 except Exception as e:
                     print (e)
                     continue                
-        print (code)    
 
 if __name__ == '__main__': 
     cur = conn.cursor()
     for year in years:    
         for season in seasons:
-            url = 'http://mops.twse.com.tw/mops/web/ajax_t163sb04?' + \
+            url = 'https://mops.twse.com.tw/mops/web/ajax_t163sb04?' + \
            'encodeURIComponent=1&step=1&firstin=1&off=1&TYPEK=sii&year='+str(year-1911) + \
            '&season=0' + season
             response = urllib.request.urlopen(url)
             html = response.read()
             sp = BeautifulSoup(html.decode('utf8'), "lxml")
             tbls=sp.find_all('table',attrs={ 'class' : "hasBorder"})
-
             for tbl in tbls:
                 ths=tbl.find_all('th')
                 i=0
