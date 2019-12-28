@@ -5,8 +5,8 @@ import pandas as pd
 import numpy as np
 import math
 
-yearList = [108]
-seasonList = [3]
+yearList = [103,104,105,106,107,108]
+seasonList = [1,2,3,4]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 def financial_statement(year, season, code):

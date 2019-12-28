@@ -31,28 +31,27 @@ def insertIntoDB(df,conn,datestr):
 
 ########################## 更新均價 ##########################
 def updateMovingAverage(df, conn, datestr):
-    cursor = conn.cursor()
-    for index, row in df.iterrows(): 
-        try:
-            code = row['證券代號']            
-            for ma in [5,20,60]:
-                sql = "select avg(p.price) \
-                       from (select code , price \
-                             from prices \
-                             where 1=1 \
-                             and date <= {} \
-                             and code = {} \
-                             order by date desc \
-                             limit 0,{}) p \
-                       group by p.code".format(datestr,code,ma) 
-                cursor.execute(sql)
-                for row in cursor:                    
-                    sql2 = "insert into ma (`code`,`date`,`span`,`value`) values (%s,%s,%s,%s)" 
-                    val2 = (code, datestr, ma, row[0])
-                    cursor.execute(sql2, val2)
-                    conn.commit()             
-        except Exception as e:
-            print (e)
+    cursor = conn.cursor() 
+    for ma in [5,20,60]:
+        # tune sql performance by rusiang 20191228
+        sql = "insert into ma (`code`,`date`,`span`,`value`) \
+               select code, {}, {}, round(AVG(price),2) \
+               from prices p \
+               where 1=1 \
+               and length(code) = 4 \
+               and p.date >= ( \
+                 select min(d.date) \
+                 from ( \
+                   select distinct date \
+                   from prices \
+                   where date <= {} \
+                   order by date desc \
+                   limit 0, {} \
+                 ) d \
+               ) \
+               group by code ".format(datestr, ma, datestr, ma)
+        cursor.execute(sql)
+        conn.commit()              
 
 def priceParser(conn):           
     req_url = 'http://www.twse.com.tw/exchangeReport/MI_INDEX?response=csv&date='     
