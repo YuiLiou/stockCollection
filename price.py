@@ -67,6 +67,8 @@ def priceParser(conn):
     #//////////////////////////////// 更新股價 ////////////////////////////////     
     date = datetime.datetime.now()
     while date.strftime("%Y%m%d") != start_date:
+    #date = datetime.datetime(2019,1,2)
+    #while date.strftime("%Y%m%d") != "20181130":
         if date.weekday() in [0,1,2,3,4]:
             try:
                 datestr = date.strftime("%Y%m%d")

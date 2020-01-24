@@ -5,14 +5,15 @@ import pandas as pd
 import numpy as np
 import math
 
-yearList = [107,106,105,104,103]
-seasonList = [4,3,2,1]
+yearList = [108]
+seasonList = [3]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
+# 合併綜合損益表 By Company
 def financial_statement(year, season, code):
     if year >= 1000:
         year -= 1911
-    url = 'https://mops.twse.com.tw/mops/web/ajax_t164sb03'
+    url = 'https://mops.twse.com.tw/mops/web/ajax_t164sb04'
     form_data = {
         'encodeURIComponent':1,
         'step':1,
@@ -38,27 +39,27 @@ def insertRows(stock_df, cur):
         try:
             # 標題
             if index == 2:
-                sql = "insert into property_2 " \
+                sql = "insert into income_3 " \
                       "(`year`,`season`,`code`,`col_name`,`col_index`,`v1`,`v2`,`v3`,`v4`,`v5`,`v6`) " \
                       "values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
                 val = (yearStr,seasonStr,code,row[0],index,row[1],"%",row[2],"%",row[3],"%")
                 cur.execute(sql, val)
             # 去年全年+同期
             elif index > 3 and len(row) > 5:
-                sql = "insert into property_2 " \
+                sql = "insert into income_3 " \
                       "(`year`,`season`,`code`,`col_name`,`col_index`,`v1`,`v2`,`v3`,`v4`,`v5`,`v6`) " \
                       "values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
                 val = (yearStr,seasonStr,code,row[0],index,row[1],row[2],row[3],row[4],row[5],row[6])
                 cur.execute(sql, val)
             # 去年同期
             elif index > 3:    
-                sql = "insert into property_2 " \
+                sql = "insert into income_3 " \
                       "(`year`,`season`,`code`,`col_name`,`col_index`,`v1`,`v2`,`v3`,`v4`) " \
                       "values(%s,%s,%s,%s,%s,%s,%s,%s,%s) "
                 val = (yearStr,seasonStr,code,row[0],index,row[1],row[2],row[3],row[4])
                 cur.execute(sql, val)
         except Exception as e:
-            print (e)    
+            print (e, row)    
     conn.commit()             
 
 if __name__ == '__main__':    
@@ -71,7 +72,7 @@ if __name__ == '__main__':
                   "FROM own " \
                   "where code not in ( " \
                   "    select code " \
-                  "    from property_2 " \
+                  "    from income_3 " \
                   "    where 1=1 " \
                   "    and year = '" + yearStr + "'" \
                   "    and season = '" + seasonStr + "'" \
@@ -83,7 +84,8 @@ if __name__ == '__main__':
                 code_list.append(row[0])
             for code in code_list:
                 try:
-                    stock_df = financial_statement(year,season,code)        
+                    stock_df = financial_statement(year,season,code)       
+                    #print (stock_df) 
                     insertRows(stock_df, cur)
                     print (code, ' complete.')         
                 except Exception as e:
