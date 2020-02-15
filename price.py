@@ -67,8 +67,8 @@ def priceParser(conn):
     #//////////////////////////////// 更新股價 ////////////////////////////////     
     date = datetime.datetime.now()
     while date.strftime("%Y%m%d") != start_date:
-    #date = datetime.datetime(2019,1,2)
-    #while date.strftime("%Y%m%d") != "20181130":
+    #date = datetime.datetime(2018,4,9)
+    #while date.strftime("%Y%m%d") != "20171130":
         if date.weekday() in [0,1,2,3,4]:
             try:
                 datestr = date.strftime("%Y%m%d")
@@ -77,11 +77,14 @@ def priceParser(conn):
                                     for i in r.text.split('\n') 
                                      if len(i.split('",')) == 17 and i[0] != '='])), header=0)
                 insertIntoDB(df,conn,datestr)
-                print (datestr,'股價更新')                
+                print (datestr,'股價更新')
+                date -= datetime.timedelta(days=1)
+                time.sleep(10)                
             except Exception as e:
-                print (e) 
-        date -= datetime.timedelta(days=1)
-        time.sleep(10)
+                print (e)
+                time.sleep(60) 
+        else:
+            date -= datetime.timedelta(days=1)
 
     #//////////////////////////////// start date ////////////////////////////////
     cursor = conn.cursor() 
