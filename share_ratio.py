@@ -1,14 +1,28 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, timedelta
+#from datetime import datetime, timedelta
+import datetime
 import pandas as pd
 import scrapy
 import requests
 import pymysql
 import time
 from htmltable_df.extractor import Extractor
-conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
+#conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
+
+def isNumer(user_input):
+    try:
+        val = int(user_input)
+        return True
+    except ValueError:
+        try:
+            val = float(user_input)
+            return True
+        except ValueError:
+            return False
 
 def start_requests(cursor, beginDate, endDate):
+    print (beginDate)
+    print (endDate)
     url = 'https://www.tdcc.com.tw/smWeb/QryStockAjax.do'
     for date in pd.date_range(beginDate, endDate, freq='W-FRI')[::-1]:
         scaDate = '{}{:02d}{:02d}'  .format(date.year, date.month, date.day)
@@ -46,19 +60,33 @@ def start_requests(cursor, beginDate, endDate):
                         continue
                     sql = "INSERT INTO share_ratio (`date`,`code`,`rank`,`number`,`person`,`rate`) \
                            VALUES (%s,%s,%s,%s,%s,%s)"
-                    val = (scaDate,code,row['持股/單位數分級'],row['股　　數/單位數'],row['人　　數'],row['占集保庫存數比例 (%)'])
-                    cursor.execute(sql, val)
-                    conn.commit()
-                    print (code, scaDate, row['持股/單位數分級'],row['股　　數/單位數'],row['人　　數'],row['占集保庫存數比例 (%)'])
+                    if isNumer(row['股　　數/單位數']):
+                        val = (scaDate,code,row['持股/單位數分級'],row['股　　數/單位數'],row['人　　數'],row['占集保庫存數比例 (%)'])
+                        cursor.execute(sql, val)
+                        conn.commit()
+                        print (code, scaDate, row['持股/單位數分級'],row['股　　數/單位數'],row['人　　數'],row['占集保庫存數比例 (%)'])
                 time.sleep(3)                 
         except Exception as e:
             print (e)
             
-if __name__ == '__main__':
+def shareRatioParser(conn):
     cur = conn.cursor()
-    endDate   =  (datetime.today() - timedelta(days=14)).strftime("%Y/%m/%d")
-    startDate =  (datetime.today() - timedelta(days=365)).strftime("%Y/%m/%d")
-    start_requests(cur,startDate,endDate)
+    # 最近更新日期 ---------------------------------------------------------------------
+    sql = "select max(date) " \
+          "from share_ratio " \
+          "where code in " \
+          "( " \
+          "  select max(code) " \
+          "  from own " \
+          ") "
+    cur.execute(sql)
+    for row in cur:
+        beginDate = datetime.datetime.strptime(row[0],"%Y%m%d").strftime("%Y/%m/%d")
+    #beginDate =   datetime.datetime(2020,2,7).strftime("%Y/%m/%d")
+    # --------------------------------------------------------------------------------
+    #endDate   =  (beginDate + datetime.timedelta(days=14)).strftime("%Y/%m/%d")
+    endDate = datetime.datetime.now().strftime("%Y/%m/%d")
+    start_requests(cur,beginDate,endDate)
 
 
     
