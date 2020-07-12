@@ -4,14 +4,20 @@ import time
 
 url = 'https://tw.stock.yahoo.com/d/s/dividend_{}.html'
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
-
+t_year = '2019'
 if __name__ == '__main__':    
     cursor = conn.cursor()     
-    sql = "SELECT distinct(code) \
-           FROM company_map \
-           where code not in ( \
-               select code \
-               from dividend)"
+    sql = "select distinct code \
+           from dividend d \
+           where 1=1 \
+           and not exists \
+           ( \
+             select 1 \
+             from dividend d2 \
+             where 1=1 \
+             and d2.code = d.code \
+             and d2.year = " + t_year + " \
+           )"
     cursor.execute(sql)
     codes = []
     for row in cursor:
@@ -32,6 +38,8 @@ if __name__ == '__main__':
             try:                
                 sql = "INSERT INTO dividend (`code`,`year`,`cash`,`allotment`,`total`) VALUES (%s,%s,%s,%s,%s)"
                 year = str(int(row[0]) + 1911)
+                if year != t_year:
+                    break 
                 val = (code,year,row[1],row[4],row[5])
                 cursor.execute(sql, val)
                 conn.commit()

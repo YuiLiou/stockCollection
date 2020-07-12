@@ -8,7 +8,7 @@ import time
 import math
 
 year = 2020
-months = [1]
+months = [6]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 def monthly_report(year, month):
@@ -57,7 +57,7 @@ if __name__ == '__main__':
                        values (%s,%s,%s,%s,%s,%s,%s)"
                 MoM = row['上月比較增減(%)']
                 YoY = row['去年同月增減(%)']
-                Yearly_YoY = row['前期比較增減(%)']
+                Yearly_YoY = row.get('前期比較增減(%)',0)
                 s_month = str(year) + str.zfill(str(month),2)
                 val = (row['公司代號'],s_month,row['當月營收'],row['當月累計營收'],MoM,YoY,Yearly_YoY)    
                 cur.execute(sql, val)               

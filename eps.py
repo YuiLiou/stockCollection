@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 url = 'http://mops.twse.com.tw/mops/web/ajax_t163sb04?'\
       'encodeURIComponent=1&step=1&firstin=1&off=1&TYPEK=sii&year=102&season=01'
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
-years = [2019]
-seasons = ["3"]
+years = [2020]
+seasons = ["1"]
 
 def indivisualSeason(cursor, year, season):
     '''各季eps對照表'''

@@ -82,6 +82,7 @@ def priceParser(conn):
                 time.sleep(10)                
             except Exception as e:
                 print (e)
+                date -= datetime.timedelta(days=1)
                 time.sleep(60) 
         else:
             date -= datetime.timedelta(days=1)

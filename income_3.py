@@ -5,8 +5,8 @@ import pandas as pd
 import numpy as np
 import math
 
-yearList = [107]
-seasonList = [1,2,3]
+yearList = [109]
+seasonList = [1]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 # 合併綜合損益表 By Company

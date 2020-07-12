@@ -20,11 +20,15 @@ def isNumer(user_input):
         except ValueError:
             return False
 
-def start_requests(cursor, beginDate, endDate):
+def start_requests(conn, beginDate, endDate):
+    cursor = conn.cursor()
     print (beginDate)
     print (endDate)
     url = 'https://www.tdcc.com.tw/smWeb/QryStockAjax.do'
     for date in pd.date_range(beginDate, endDate, freq='W-FRI')[::-1]:
+#    for date in pd.date_range(beginDate, endDate, freq='W-WED')[::-1]:
+#    for date in pd.date_range(beginDate, endDate, freq='W-THU')[::-1]:
+#    for date in pd.date_range(beginDate, endDate, freq='W-SAT')[::-1]:
         scaDate = '{}{:02d}{:02d}'  .format(date.year, date.month, date.day)
         date    = '{}/{:02d}/{:02d}'.format(date.year, date.month, date.day)
         sql = "SELECT code " \
@@ -53,7 +57,8 @@ def start_requests(cursor, beginDate, endDate):
                     'clkStockNo': code,
                     'clkStockName': ''
                 } 
-                html=requests.post(url,data=payload).text
+                headers = {"User-Agent" : "User-Agent:Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0;"}          
+                html=requests.post(url,data=payload, headers=headers).content.decode('big5')
                 data=Extractor(html,'table.mt:eq(1)').df(1)
                 for index, row in data.iterrows():        
                     if index == 15:
@@ -82,11 +87,11 @@ def shareRatioParser(conn):
     cur.execute(sql)
     for row in cur:
         beginDate = datetime.datetime.strptime(row[0],"%Y%m%d").strftime("%Y/%m/%d")
-    #beginDate =   datetime.datetime(2020,2,7).strftime("%Y/%m/%d")
+    #beginDate = datetime.datetime(2020,4,29).strftime("%Y/%m/%d")
     # --------------------------------------------------------------------------------
-    #endDate   =  (beginDate + datetime.timedelta(days=14)).strftime("%Y/%m/%d")
+    #endDate   = datetime.datetime(2020,5,1).strftime("%Y/%m/%d")
     endDate = datetime.datetime.now().strftime("%Y/%m/%d")
-    start_requests(cur,beginDate,endDate)
+    start_requests(conn,beginDate,endDate)
 
 
     

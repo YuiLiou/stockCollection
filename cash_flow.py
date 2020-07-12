@@ -4,8 +4,8 @@ import pymysql
 import time
 
 # 爬取目標網站
-year = 104
-season = 3
+year = 109
+season = 1
 
 BalanceSheetURL = "http://mops.twse.com.tw/mops/web/ajax_t164sb03";      # 資產負債表
 ProfitAndLoseURL = "https://mops.twse.com.tw/mops/web/ajax_t164sb04";    # 損益表

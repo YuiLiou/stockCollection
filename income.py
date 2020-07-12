@@ -4,8 +4,8 @@ import requests
 import pandas as pd
 import numpy as np
 
-years = [2019]
-seasons = [3]
+years = [2020]
+seasons = [1]
 conn = pymysql.connect(host='127.0.0.1',user='root',password='842369',db='stock')
 
 def financial_statement(year, season, type='綜合損益彙總表'):
